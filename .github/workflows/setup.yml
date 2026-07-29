@@ -44,7 +44,7 @@ jobs:
 
       - name: Replace project name
         run: |
-          sed -i "s/CPP_TEMPLATE/${{ steps.name.outputs.safe }}/g" CMakeLists.txt README.md
+          sed -i "s/CPP_Template/${{ steps.name.outputs.safe }}/g" CMakeLists.txt README.md
           sed -i "s/CPP_TEMPLATE/${{ steps.name.outputs.upper }}/g" Sources/main.cpp
       
       - name: Generate LICENSE
