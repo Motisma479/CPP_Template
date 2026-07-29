@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       project_name:
-        description: 'Project name (default value: repository name)'
+        description: 'Project name (default: repository name)'
         required: false
         type: string
       project_description:
@@ -15,7 +15,7 @@ on:
         required: false
         type: string
       project_author:
-        description: 'Project Author (default value: Owner name)'
+        description: 'Project Author (default: Owner name)'
         required: false
         type: string
       project_license:
