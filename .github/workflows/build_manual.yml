@@ -92,7 +92,7 @@ jobs:
             
           - os: windows-latest
             build_type: ${{ inputs.buildType }}
-            generator: "Visual Studio 17 2022"
+            generator: "Visual Studio 18 2026"
             arch: x64
 
     steps:
