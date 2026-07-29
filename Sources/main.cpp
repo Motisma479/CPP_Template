@@ -12,7 +12,11 @@ int main(int argc, char** argv)
 	//_CrtSetBreakAlloc(284);
 #endif
 
-	std::cout << "Hello World!\n";
+	std::cout << "---- HELLO WORLD ----\n"
+	<< "Version: " << CPP_TEMPLATE_VERSION << '\n'
+	<< "- Major "  << CPP_TEMPLATE_VERSION_MAJOR << '\n'
+	<< "- Minor "  << CPP_TEMPLATE_VERSION_MINOR << '\n'
+	<< "- Patch "  << CPP_TEMPLATE_VERSION_PATCH << '\n';
 
 	return 0;
 }
