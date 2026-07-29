@@ -1,0 +1,75 @@
+name: Setup
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      project_name:
+        description: 'Project Name (defaults to the repo name)'
+        required: false
+        type: string
+      project_license:
+        description: 'Project LICENSE'
+        required: true
+        type: choice
+        default: 'None'
+        options:
+        - None
+        - MIT License
+        - Apache License 2.0
+        - GNU General Public License v3.0
+        - The Unlicense
+jobs:
+  setup:
+    # never run on the template itself
+    if: github.repository != 'Motisma479/CPP_Template'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@7
+      
+      - name: Compute Project Name
+        id: name
+        run: |
+          RAW="${{ inputs.project_name }}"
+          if [ -z "$RAW" ]; then
+            RAW="${{ github.event.repository.name }}"
+          fi
+          SAFE=$(echo "$RAW" | sed -E 's/[^A-Za-z0-9_]/_/g')
+          UPPER=$(echo "$SAFE" | tr '[:lower:]' '[:upper:]')
+          echo "safe=$SAFE" >> "$GITHUB_OUTPUT"
+          echo "upper=$UPPER" >> "$GITHUB_OUTPUT"
+
+      - name: Replace project name
+        run: |
+          sed -i "s/CPP_TEMPLATE/${{ steps.name.outputs.safe }}/g" CMakeLists.txt README.md
+          sed -i "s/CPP_TEMPLATE/${{ steps.name.outputs.upper }}/g" Sources/main.cpp
+      
+      - name: Generate LICENSE
+        if: ${{ inputs.project_license != 'None' }}
+        env:
+          CHOICE: ${{ inputs.project_license }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          case "$CHOICE" in
+            "MIT License") KEY="mit" ;;
+            "Apache License 2.0") KEY="apache-2.0" ;;
+            "GNU General Public License v3.0") KEY="gpl-3.0" ;;
+            "The Unlicense") KEY="unlicense" ;;
+          esac
+
+          curl -sL "https://api.github.com/licenses/$KEY" | jq -r .body > LICENSE
+          sed -i "s/\[year\]/$(date +%Y)/g; s/\[fullname\]/$OWNER/g" LICENSE
+
+      - name: Remove setup workflow
+        run: rm -f .github/workflows/setup.yml
+
+      - name: Commit and push
+        run: |
+          git config user.name git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+          git add -A
+          git commit -m "[Workflow] Initialize repository as ${{ steps.name.outputs.safe }}"
+          git push
