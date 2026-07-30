@@ -50,10 +50,30 @@ jobs:
           echo "safe=$SAFE" >> "$GITHUB_OUTPUT"
           echo "upper=$UPPER" >> "$GITHUB_OUTPUT"
 
+      - name: Compute Author Name
+        id: author
+        run: |
+          RAW="${{ inputs.project_author }}"
+          if [ -z "$RAW" ]; then
+            RAW="${{github.event.repository.owner.name}}"
+          fi
+          if [ -z "$RAW" ]; then
+            RAW="${{github.event.repository.owner.login}}"
+          fi
+          echo "name=$RAW" >> "$GITHUB_OUTPUT"
+
       - name: Replace project name
         run: |
           sed -i "s/CPP_Template/${{ steps.name.outputs.safe }}/g" CMakeLists.txt README.md
           sed -i "s/CPP_TEMPLATE/${{ steps.name.outputs.upper }}/g" Sources/main.cpp
+      
+      - name: Set project description
+        run: |
+          sed -E 's/(project\([^)]*DESCRIPTION )""+/\1"${{ inputs.project_description }}"/' -i CMakeLists.txt
+
+      - name: Set username
+        run: |
+          sed -E 's/(set\([^)]*PROJECT_AUTHOR )""+/\1"${{ steps.author.outputs.name }}"/' -i CMakeLists.txt
       
       - name: Generate LICENSE
         if: ${{ inputs.project_license != 'None' }}
